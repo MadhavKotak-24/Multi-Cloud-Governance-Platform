@@ -1,0 +1,45 @@
+name: GitOps Deployment Pipeline
+
+on:
+  repository_dispatch:
+    types: [deployment_request]
+
+jobs:
+  execute-deployment:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Log Deployment Request
+        run: |
+          echo "🚀 Starting deployment for ${{ github.event.client_payload.application }}"
+          echo "Target: ${{ github.event.client_payload.cloud }} / ${{ github.event.client_payload.environment }}"
+          echo "Deployment ID: ${{ github.event.client_payload.deployment_id }}"
+
+      - name: Notify Backend (In Progress)
+        run: |
+          curl -X PATCH "${{ secrets.API_BASE_URL }}/deployments/${{ github.event.client_payload.deployment_id }}/status" \
+          -H "Content-Type: application/json" \
+          -H "x-pipeline-token: ${{ secrets.PIPELINE_TOKEN }}" \
+          -d '{"status": "IN_PROGRESS"}'
+
+      - name: Simulate Infrastructure Provisioning
+        run: |
+          echo "🏗️ Provisioning resources..."
+          sleep 5
+          echo "✅ Resources provisioned successfully."
+
+      - name: Notify Backend (Success)
+        if: success()
+        run: |
+          curl -X PATCH "${{ secrets.API_BASE_URL }}/deployments/${{ github.event.client_payload.deployment_id }}/status" \
+          -H "Content-Type: application/json" \
+          -H "x-pipeline-token: ${{ secrets.PIPELINE_TOKEN }}" \
+          -d '{"status": "SUCCESS"}'
+
+      - name: Notify Backend (Failure)
+        if: failure()
+        run: |
+          curl -X PATCH "${{ secrets.API_BASE_URL }}/deployments/${{ github.event.client_payload.deployment_id }}/status" \
+          -H "Content-Type: application/json" \
+          -H "x-pipeline-token: ${{ secrets.PIPELINE_TOKEN }}" \
+          -d '{"status": "FAILED"}'
