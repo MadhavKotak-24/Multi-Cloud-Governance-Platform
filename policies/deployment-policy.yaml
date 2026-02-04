@@ -1,0 +1,13 @@
+allowed_clouds:
+  - aws
+  - azure
+
+allowed_environments:
+  - dev
+  - test
+
+application:
+  min_length: 3
+  allowed_pattern: "^[a-z0-9-]+$"
+
+resource_limits_required: true

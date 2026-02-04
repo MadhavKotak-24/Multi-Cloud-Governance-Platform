@@ -1,0 +1,31 @@
+name: Platform Deployment Pipeline
+
+on:
+  repository_dispatch:
+    types: [platform-deploy]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Print deployment context
+        run: |
+          echo "Cloud: ${{ github.event.client_payload.cloud }}"
+          echo "Environment: ${{ github.event.client_payload.environment }}"
+          echo "Application: ${{ github.event.client_payload.application }}"
+
+      - name: Policy validation (mock)
+        run: |
+          echo "Validating policies..."
+          sleep 1
+          echo "Policies passed"
+
+      - name: Execution (mock)
+        run: |
+          echo "Executing deployment..."
+          sleep 2
+          echo "Deployment successful"

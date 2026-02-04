@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Cloud Governance Platform</title>
+    <style>
+        /* * =========================================
+         * CSS VARIABLES & RESET
+         * =========================================
+         */
+        :root {
+            --bg-body: #f1f5f9;
+            --bg-card: #ffffff;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+
+            --status-success-bg: #dcfce7; --status-success-text: #166534;
+            --status-pending-bg: #e0f2fe; --status-pending-text: #075985;
+            --status-failed-bg: #fee2e2; --status-failed-text: #991b1b;
+            --status-audit-bg: #fef3c7;   --status-audit-text: #92400e;
+
+            --radius: 6px;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* * =========================================
+         * LAYOUT & NAV
+         * =========================================
+         */
+        .top-nav {
+            background-color: #0f172a; color: white; padding: 0 2rem; height: 64px;
+            display: flex; align-items: center; justify-content: space-between;
+            box-shadow: var(--shadow-md); position: sticky; top: 0; z-index: 100;
+        }
+        .brand-section { display: flex; align-items: center; gap: 1rem; }
+        .logo-text { font-weight: 700; font-size: 1.1rem; }
+        .sub-text { font-size: 0.8rem; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px; color: #94a3b8; }
+
+        .nav-links { display: flex; gap: 2rem; }
+        .nav-links a {
+            color: #cbd5e1; text-decoration: none; font-size: 0.9rem; font-weight: 500;
+            padding-bottom: 2px; border-bottom: 2px solid transparent; transition: all 0.2s;
+        }
+        .nav-links a:hover, .nav-links a.active { color: white; border-bottom-color: white; }
+
+        .health-badge {
+            display: flex; align-items: center; gap: 6px; font-size: 0.8rem;
+            background: rgba(16, 185, 129, 0.15); color: #34d399;
+            padding: 4px 12px; border-radius: 100px; border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .health-dot { width: 8px; height: 8px; background: #34d399; border-radius: 50%; box-shadow: 0 0 8px rgba(52, 211, 153, 0.6); }
+
+        main {
+            max-width: 1400px; margin: 0 auto; width: 100%; padding: 2rem;
+            display: grid; grid-template-columns: 350px 1fr; grid-template-rows: auto 1fr; gap: 1.5rem;
+        }
+
+        /* View Utility: display: contents preserves grid layout */
+        .view-section { display: contents; }
+        .hidden { display: none !important; }
+        .col-full { grid-column: 1 / -1; }
+
+        /* * =========================================
+         * COMPONENTS
+         * =========================================
+         */
+        .page-header { grid-column: 1 / -1; margin-bottom: 0.5rem; }
+        h1 { font-size: 1.5rem; font-weight: 600; color: var(--text-main); }
+        .subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+        .card {
+            background: var(--bg-card); border-radius: var(--radius);
+            box-shadow: var(--shadow-sm); border: 1px solid var(--border-color);
+            display: flex; flex-direction: column; overflow: hidden; margin-bottom: 1.5rem;
+        }
+        .card-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); background: #fafbfc; }
+        .card-title { font-size: 1rem; font-weight: 600; color: var(--text-main); }
+        .card-body { padding: 1.5rem; flex: 1; }
+
+        .form-control {
+            width: 100%; padding: 0.6rem; border: 1px solid var(--border-color);
+            border-radius: var(--radius); font-size: 0.9rem; background: #fff;
+        }
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 0.5rem; }
+
+        .btn-primary {
+            display: block; width: 100%; padding: 0.75rem; text-align: center;
+            background: var(--primary); color: white; border: none; border-radius: var(--radius);
+            font-weight: 600; cursor: pointer; transition: background 0.2s;
+        }
+        .btn-primary:hover { background: var(--primary-hover); }
+
+        /* Tables */
+        .dashboard-panel { grid-column: 2; grid-row: 2; display: flex; flex-direction: column; gap: 1.5rem; }
+        .table-container { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th { text-align: left; padding: 0.75rem 1.5rem; background: #f8fafc; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; border-bottom: 1px solid var(--border-color); }
+        td { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
+
+        .status-badge { padding: 2px 8px; border-radius: 100px; font-size: 0.75rem; font-weight: 600; }
+        .status-success { background: var(--status-success-bg); color: var(--status-success-text); }
+        .status-pending { background: var(--status-pending-bg); color: var(--status-pending-text); }
+        .status-failed { background: var(--status-failed-bg); color: var(--status-failed-text); }
+        .status-audit { background: var(--status-audit-bg); color: var(--status-audit-text); }
+
+        .provider-icon { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+        .aws-icon { background: #FF9900; } .azure-icon { background: #0078D4; }
+
+        /* Timeline */
+        .details-timeline { margin-top: 1rem; }
+        .timeline-item { display: flex; gap: 1rem; padding-bottom: 1.5rem; position: relative; }
+        .timeline-item::before { content: ''; position: absolute; left: 7px; top: 20px; bottom: 0; width: 2px; background: var(--border-color); }
+        .timeline-item:last-child::before { display: none; }
+        .timeline-marker { width: 16px; height: 16px; border-radius: 50%; background: white; border: 2px solid var(--border-color); flex-shrink: 0; margin-top: 4px; z-index: 1; }
+        .timeline-marker.active { border-color: var(--primary); background: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+        .timeline-marker.completed {background: var(--primary);border-color: var(--primary);opacity: 0.35}
+        .timeline-content h4 { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.25rem; }
+        .timeline-content p { font-size: 0.85rem; color: var(--text-muted); }
+        .timeline-time { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+        /* Settings & Policy Specifics */
+        .policy-meta { display: flex; gap: 1rem; margin-bottom: 0.5rem; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+        .toggle-switch { width: 36px; height: 20px; background: #cbd5e1; border-radius: 20px; position: relative; display: inline-block; }
+        .toggle-switch::after { content: ''; position: absolute; left: 2px; top: 2px; width: 16px; height: 16px; background: white; border-radius: 50%; }
+        .toggle-active { background: var(--primary); }
+        .toggle-active::after { left: 18px; }
+
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.6); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+        .modal-overlay:target { display: flex; }
+        .modal-dialog { background: white; width: 100%; max-width: 450px; border-radius: 8px; box-shadow: var(--shadow-md); animation: fadeIn 0.2s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-header { padding: 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; gap: 0.75rem; background: #fffafa; border-radius: 8px 8px 0 0; }
+        .modal-body { padding: 1.5rem; }
+        .policy-code { font-family: monospace; background: #f1f5f9; padding: 0.5rem; border-radius: 4px; font-size: 0.85rem; margin-top: 0.5rem; border: 1px solid var(--border-color); }
+        .modal-footer { padding: 1rem; background: #f8fafc; text-align: right; border-top: 1px solid var(--border-color); border-radius: 0 0 8px 8px; }
+        .btn-close { padding: 0.5rem 1rem; background: white; border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-main); text-decoration: none; font-size: 0.9rem; }
+
+        @media (max-width: 900px) {
+            main { grid-template-columns: 1fr; }
+            .dashboard-panel { grid-column: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="top-nav">
+        <div class="brand-section">
+            <span class="logo-text">CloudGov Platform</span>
+            <span class="sub-text">Internal Developer Portal</span>
+        </div>
+        <nav class="nav-links">
+            <a href="#" class="active">Dashboard</a>
+            <a href="#">Deployments</a>
+            <a href="#">Policies</a>
+            <a href="#">Settings</a>
+        </nav>
+        <div class="health-badge"><div class="health-dot"></div>Platform Healthy</div>
+    </header>
+
+    <main>
+
+        <section data-view="dashboard" class="view-section">
+            <div class="page-header">
+                <h1>Deployment Control Plane</h1>
+                <p class="subtitle">Manage multi-cloud application lifecycles and governance policies.</p>
+            </div>
+
+            <section class="card deployment-form-card">
+                <div class="card-header"><div class="card-title">Request Deployment</div></div>
+                <div class="card-body">
+                    <form>
+                        <div class="form-group">
+                            <label>Application Name</label>
+                            <input type="text" id="app-name" class="form-control" placeholder="e.g. payment-service-v2">
+                        </div>
+                        <div class="form-group">
+                            <label>Cloud Provider</label>
+                            <select id="provider" class="form-control">
+                                <option value="" disabled selected>Select Provider...</option>
+                                <option value="aws">AWS (Amazon Web Services)</option>
+                                <option value="azure">Microsoft Azure</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Target Environment</label>
+                            <select id="environment" class="form-control">
+                                <option value="dev">Development</option>
+                                <option value="test">Testing / QA</option>
+                                <option value="prod">Production</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-primary">Initiate Deployment</button>
+                        <p style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-muted); text-align: center;">
+                            By deploying, you agree to the <a href="#" style="color: var(--primary);">Governance Policy v1.4</a>
+                        </p>
+                    </form>
+                </div>
+            </section>
+
+            <div class="dashboard-panel">
+                <section class="card">
+                    <div class="card-header"><div class="card-title">Recent Deployments</div></div>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>ID</th><th>Cloud</th><th>Env</th><th>App</th><th>Status</th><th>Time</th></tr></thead>
+                            <tbody id="dashboard-table-body">
+                                </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <div class="card-header"><div class="card-title" id="timeline-title">Live Lifecycle Events</div></div>
+                    <div class="card-body">
+                        <div class="details-timeline" id="timeline-container">
+                            <div style="text-align:center; color: var(--text-muted); padding: 1rem;">Select a deployment to view events</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </section>
+
+        <section data-view="deployments" class="view-section hidden">
+            <div class="page-header col-full">
+                <h1>Deployment History</h1>
+                <p class="subtitle">Complete audit log of all system changes.</p>
+            </div>
+            <div class="dashboard-panel col-full">
+                <section class="card">
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>Deployment ID</th><th>Cloud</th><th>Environment</th><th>Application</th><th>Status</th><th>Timestamp</th></tr></thead>
+                            <tbody id="full-history-body">
+                                </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </section>
+
+        <section data-view="policies" class="view-section hidden">
+            <div class="page-header col-full">
+                <h1>Governance Policies</h1>
+                <p class="subtitle">Active OPA constraints and compliance rules.</p>
+            </div>
+            <div class="col-full" id="policies-container">
+                </div>
+        </section>
+
+        <section data-view="settings" class="view-section hidden">
+            <div class="page-header col-full">
+                <h1>Platform Settings</h1>
+                <p class="subtitle">Manage configuration and preferences.</p>
+            </div>
+            <div class="dashboard-panel col-full" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="card">
+                    <div class="card-header"><div class="card-title">API Configuration</div></div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Control Plane API Endpoint</label>
+                            <input type="text" class="form-control" value="http://control-plane.internal:8000" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>API Key</label>
+                            <input type="password" class="form-control" value="sk_live_9982348234" disabled>
+                        </div>
+                        <button class="btn-primary" style="width: auto;">Regenerate Key</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><div class="card-title">Notifications</div></div>
+                    <div class="card-body">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
+                            <span>Email on Failure</span>
+                            <div class="toggle-switch toggle-active"></div>
+                        </div>
+                        <div style="display:flex; justify-content:space-between;">
+                            <span>Slack Alerts (#devops)</span>
+                            <div class="toggle-switch"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="policy-block" class="modal-overlay">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <div style="color:#991b1b; font-weight:bold; font-size:1.2rem;">!</div>
+                <div class="modal-title">Deployment Blocked</div>
+            </div>
+            <div class="modal-body">
+                <p>This request cannot be fulfilled due to a governance violation.</p>
+                <div style="margin-top: 1rem;">
+                    <strong>Reason:</strong>
+                    <div class="policy-code">Error: Env 'Production' requires approval.</div>
+                </div>
+            </div>
+            <div class="modal-footer"><a href="#" class="btn-close">Close</a></div>
+        </div>
+    </div>
+
+    <script>
+        function parseBackendTime(ts) {
+            if (!ts) return null;
+
+            // Accept both:
+            // 2026-01-24T10:22:41.123Z
+            // 2026-01-24T10:22:41.123+00:00
+            const d = new Date(ts);
+
+            return isNaN(d.getTime()) ? null : d;
+        }
+
+        // CONFIG
+        const API_BASE_URL = 'http://127.0.0.1:8000';
+
+        // STATIC POLICIES CONFIG
+        async function loadPolicies() {
+            try {
+                const res = await fetch(`${API_BASE_URL}/policies`);
+                if (!res.ok) throw new Error("Failed to load policies");
+                const policies = await res.json();
+                renderPolicies(policies);
+            } catch (err) {
+                el.policiesContainer.innerHTML = `
+                    <div style="color: var(--text-muted); padding:1rem;">
+                        Unable to load policies from backend
+                    </div>`;
+            }
+        }
+
+        function renderPolicies(policies) {
+            el.policiesContainer.innerHTML = policies.map(p => `
+                <div class="card">
+                    <div class="card-header" style="display:flex; justify-content:space-between;">
+                        <div class="card-title">${p.name}</div>
+                        <span class="status-badge ${
+                            p.status === 'ACTIVE' ? 'status-success' : 'status-audit'
+                        }">${p.status}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="policy-meta">
+                            ID: ${p.id} | Severity: ${p.severity}
+                        </div>
+                        <p>${p.desc}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // MOCK DATA (Fallback if backend offline)
+        const MOCK_DATA = [
+            {
+                id: "DEP-8833", cloud: "azure", environment: "dev", application: "data-proc", status: "IN_PROGRESS", created_at: new Date().toISOString(),
+                events: [
+                    { title: "Request Received", time: new Date(Date.now() - 60000).toISOString(), desc: "Initiated by user" },
+                    { title: "Policy Check", time: new Date(Date.now() - 30000).toISOString(), desc: "OPA Policies Verified" },
+                    { title: "Terraform Apply", time: new Date().toISOString(), desc: "Provisioning Resources..." }
+                ]
+            },
+            {
+                id: "DEP-8832", cloud: "aws", environment: "prod", application: "user-auth", status: "SUCCESS", created_at: new Date(Date.now() - 3600000).toISOString(),
+                events: [
+                    { title: "Request Received", time: new Date(Date.now() - 3600000).toISOString(), desc: "Initiated by user" },
+                    { title: "Completion", time: new Date(Date.now() - 3500000).toISOString(), desc: "Deployment successful" }
+                ]
+            }
+        ];
+
+        // DOM CACHE
+        const el = {
+            navLinks: document.querySelectorAll('.nav-links a'),
+            views: document.querySelectorAll('[data-view]'),
+            form: document.querySelector('form'),
+            inputs: {
+                app: document.getElementById('app-name'),
+                prov: document.getElementById('provider'),
+                env: document.getElementById('environment')
+            },
+            submitBtn: document.querySelector('.deployment-form-card .btn-primary'),
+            tables: {
+                dash: document.getElementById('dashboard-table-body'),
+                full: document.getElementById('full-history-body')
+            },
+            timeline: {
+                container: document.getElementById('timeline-container'),
+                title: document.getElementById('timeline-title')
+            },
+            policiesContainer: document.getElementById('policies-container'),
+            modal: {
+                id: 'policy-block',
+                text: document.querySelector('.policy-code')
+            }
+        };
+        let selectedDeploymentId = null;
+
+        // INIT
+        document.addEventListener('DOMContentLoaded', () => {
+            initNavigation();
+            loadPolicies();
+            fetchData();
+
+            // Poll for new data every 3 seconds to create a "live" feel
+            setInterval(fetchData, 3000);
+
+            if(el.submitBtn) el.submitBtn.addEventListener('click', handleSubmit);
+        });
+
+        // 1. NAVIGATION LOGIC
+        function initNavigation() {
+            const viewNames = ['dashboard', 'deployments', 'policies', 'settings'];
+            el.navLinks.forEach((link, idx) => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    el.navLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+
+                    const target = viewNames[idx];
+                    el.views.forEach(v => v.classList.toggle('hidden', v.dataset.view !== target));
+                });
+            });
+        }
+
+        // 2. POLICIES LOGIC
+        //Deleted
+
+        // 3. DEPLOYMENT & TIMELINE LOGIC
+        async function fetchData() {
+            try {
+                // Try fetching from backend
+                const res = await fetch(`${API_BASE_URL}/deployments/`);
+                if(!res.ok) throw new Error("Offline");
+                const data = await res.json();
+                renderData(data);
+            } catch (e) {
+                console.error("Backend unreachable", e);
+                el.tables.dash.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align:center; color:var(--text-muted); padding:2rem;">
+                            Backend offline – no deployment data available
+                        </td>
+                    </tr>`;
+                }
+
+        }
+
+        function renderData(data) {
+            const rowsHtml = data.map(dep => {
+                const provClass = dep.cloud.toLowerCase().includes('aws') ? 'aws-icon' : 'azure-icon';
+                const statusClass = dep.status === 'SUCCESS' ? 'status-success' : dep.status === 'FAILED' ? 'status-failed' : 'status-pending';
+                const dt = parseBackendTime(dep.created_at);
+                const displayTime = dt ? dt.toLocaleTimeString() : "—";
+
+
+                return `
+                    <tr style="cursor:pointer" onclick='renderTimeline(${JSON.stringify(dep).replace(/'/g, "&#39;")})'>
+                        <td style="font-family:monospace">#${dep.id.substring(0,8)}</td>
+                        <td><span class="provider-icon ${provClass}"></span>${dep.cloud}</td>
+                        <td>${dep.environment}</td>
+                        <td>${dep.application}</td>
+                        <td><span class="status-badge ${statusClass}">${dep.status}</span></td>
+                        <td>${displayTime}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            el.tables.dash.innerHTML = rowsHtml;
+            el.tables.full.innerHTML = rowsHtml;
+
+            // Render timeline for the latest deployment by default
+            if(data.length > 0) renderTimeline(data[0]);
+            // Render timeline for the selected or latest deployment, preserving user's view
+            if (data.length > 0) {
+                const deploymentToRender = selectedDeploymentId
+                    ? data.find(d => d.id === selectedDeploymentId)
+                    : data[0];
+
+                if (deploymentToRender) {
+                    renderTimeline(deploymentToRender);
+                } else {
+                    // Fallback if selected ID is no longer valid
+                    renderTimeline(data[0]);
+                }
+            }
+        }
+
+        // Expose to window for onclick handler
+        window.renderTimeline = function(dep) {
+            selectedDeploymentId = dep.id;
+
+            el.timeline.title.textContent =
+                `Live Lifecycle Events: #${dep.id.substring(0,8)} (${dep.application})`;
+
+            const events = dep.events || [
+                { status: "REQUESTED", time: dep.created_at }
+            ];
+
+            const activeIndex = events.length - 1;
+
+            el.timeline.container.innerHTML = events.map((evt, idx) => {
+                const dt = parseBackendTime(evt.time);
+                const displayTime = dt ? dt.toLocaleTimeString() : "—";
+
+                let cls = "";
+                if (idx < activeIndex) cls = "completed";
+                if (idx === activeIndex) cls = "active";
+
+                return `
+                    <div class="timeline-item">
+                        <div class="timeline-marker ${cls}"></div>
+
+                        <div class="timeline-content">
+                            <h4>${evt.status.replaceAll("_", " ")}</h4>
+                            <p>Deployment status changed to ${evt.status}</p>
+                            <div class="timeline-time">${displayTime}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        };
+
+
+        // 4. SUBMIT LOGIC
+        async function handleSubmit(e) {
+            e.preventDefault();
+            const payload = {
+                application_name: el.inputs.app.value,
+                cloud_provider: el.inputs.prov.value,
+                environment: el.inputs.env.value
+            };
+
+            if(!payload.application_name || !payload.cloud_provider || !payload.environment) {
+                alert("Fill all fields"); return;
+            }
+
+            el.submitBtn.textContent = "Verifying...";
+
+            try {
+                // Simulate Backend/Mock logic
+                if(payload.environment === 'prod') throw { detail: "Policy Violation: Prod requires approval (POL-01)" };
+
+                // Success Simulation
+                const res = await fetch(`${API_BASE_URL}/deployments/`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        cloud: payload.cloud_provider,
+                        environment: payload.environment,
+                        application: payload.application_name
+                    })
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw err;
+                }
+
+                await fetchData();   // reload from backend
+                el.form.reset();
+
+            } catch (err) {
+                el.modal.text.innerText = err.detail || "Unknown Error";
+                window.location.hash = el.modal.id;
+                el.submitBtn.textContent = "Initiate Deployment";
+            }
+        }
+    </script>
+</body>
+</html>
