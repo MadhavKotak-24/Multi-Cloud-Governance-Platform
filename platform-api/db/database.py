@@ -12,3 +12,4 @@ def get_connection():
         DATABASE_URL,
         cursor_factory=psycopg2.extras.RealDictCursor
     )
+
