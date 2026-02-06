@@ -11,3 +11,7 @@ application:
   allowed_pattern: "^[a-z0-9-]+$"
 
 resource_limits_required: true
+
+rules:
+  production_requires_approval: true
+  max_app_name_length: 30
