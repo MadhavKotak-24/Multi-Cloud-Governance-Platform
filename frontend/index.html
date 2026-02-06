@@ -269,38 +269,76 @@
         <section data-view="settings" class="view-section hidden">
             <div class="page-header col-full">
                 <h1>Platform Settings</h1>
-                <p class="subtitle">Manage configuration and preferences.</p>
+                <p class="subtitle">Manage configuration and platform metadata.</p>
             </div>
-            <div class="dashboard-panel col-full" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+
+            <div class="dashboard-panel col-full" style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+
+                <!-- API CONFIG -->
                 <div class="card">
-                    <div class="card-header"><div class="card-title">API Configuration</div></div>
+                    <div class="card-header">
+                        <div class="card-title">API Configuration</div>
+                    </div>
+
                     <div class="card-body">
                         <div class="form-group">
                             <label>Control Plane API Endpoint</label>
-                            <input type="text" class="form-control" value="http://control-plane.internal:8000" disabled>
+                            <input type="text" class="form-control"
+                                value="http://127.0.0.1:8000"
+                                disabled>
                         </div>
-                        <div class="form-group">
-                            <label>API Key</label>
-                            <input type="password" class="form-control" value="sk_live_9982348234" disabled>
-                        </div>
-                        <button class="btn-primary" style="width: auto;">Regenerate Key</button>
+
+                        <p style="color: var(--text-muted); font-size:0.9rem;">
+                            Platform authentication is handled via CI/CD pipeline tokens
+                            and environment-based secrets. No static API keys are stored
+                            in the UI.
+                        </p>
                     </div>
                 </div>
+
+                <!-- NOTIFICATIONS -->
                 <div class="card">
-                    <div class="card-header"><div class="card-title">Notifications</div></div>
+                    <div class="card-header">
+                        <div class="card-title">Notifications</div>
+                    </div>
+
                     <div class="card-body">
                         <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
                             <span>Email on Failure</span>
                             <div class="toggle-switch toggle-active"></div>
                         </div>
+
                         <div style="display:flex; justify-content:space-between;">
                             <span>Slack Alerts (#devops)</span>
                             <div class="toggle-switch"></div>
                         </div>
+
+                        <p style="margin-top:1rem; color:var(--text-muted); font-size:0.85rem;">
+                            Notifications are triggered by CI/CD pipeline events.
+                        </p>
                     </div>
                 </div>
+
+                <!-- PLATFORM METADATA (NEW) -->
+                <div class="card" style="grid-column:1 / -1;">
+                    <div class="card-header">
+                        <div class="card-title">Platform Metadata</div>
+                    </div>
+
+                    <div class="card-body">
+                        <ul style="color:var(--text-muted); line-height:1.8;">
+                            <li><b>Architecture:</b> GitOps Control Plane</li>
+                            <li><b>Execution Model:</b> CI/CD-driven deployments</li>
+                            <li><b>Governance:</b> Policy-as-Code validation</li>
+                            <li><b>State Tracking:</b> Event-driven lifecycle</li>
+                            <li><b>Cloud Support:</b> AWS & Azure</li>
+                        </ul>
+                    </div>
+                </div>
+
             </div>
         </section>
+
 
     </main>
 
@@ -334,7 +372,7 @@
         }
 
         // CONFIG
-        const API_BASE_URL = 'http://127.0.0.1:8000';
+        const API_BASE_URL = 'https://multi-cloud-governance-platform.onrender.com/';
 
         // STATIC POLICIES CONFIG
         async function loadPolicies() {

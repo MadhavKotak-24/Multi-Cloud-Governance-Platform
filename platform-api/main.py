@@ -4,10 +4,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from routers.policies import router as policy_router
 from dotenv import load_dotenv
 
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
+
 # Load environment variables from .env file
 load_dotenv()
 
 app = FastAPI(title="Multi-Cloud Governance Platform")
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -23,3 +32,8 @@ app.include_router(policy_router)
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+@app.get("/")
+def root():
+    return {"message": "Cloud Governance API running"}
+
