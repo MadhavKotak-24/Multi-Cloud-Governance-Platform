@@ -2,8 +2,16 @@ import yaml
 import re
 import os
 
+# Get project root directory
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-POLICY_FILE = os.path.join(BASE_DIR, "..", "policies", "deployment-policy.yaml")
+
+POLICY_FILE = os.path.join(
+    BASE_DIR,
+    "policies",
+    "deployment-policy.yaml"
+)
+
+
 
 def load_policy():
     with open(POLICY_FILE, "r") as f:
