@@ -29,6 +29,10 @@ def trigger_github_pipeline(deployment):
 
     try:
         response = requests.post(url, json=payload, headers=headers)
+
+        print("DISPATCH STATUS:", response.status_code)
+        print("DISPATCH BODY:", response.text)
+
         response.raise_for_status()
         print(f"GitHub pipeline triggered for deployment {deployment.id}")
     except requests.exceptions.RequestException as e:
