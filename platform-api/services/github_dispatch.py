@@ -18,7 +18,7 @@ def trigger_github_pipeline(deployment):
     }
     
     payload = {
-        "event_type": "deployment_request",
+        "event_type": "platform_deploy",
         "client_payload": {
             "deployment_id": deployment.id,
             "cloud": deployment.cloud,
