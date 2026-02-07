@@ -9,8 +9,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+
+      - name: Debug event
+        run: echo "${{ toJson(github.event) }}"
 
       - name: Print deployment context
         run: |
@@ -18,22 +20,14 @@ jobs:
           echo "Environment: ${{ github.event.client_payload.environment }}"
           echo "Application: ${{ github.event.client_payload.application }}"
 
-      - name: Policy validation (mock)
-        run: |
-          echo "Validating policies..."
-          sleep 1
-          echo "Policies passed"
-
       - name: Execution (mock)
         run: |
           echo "Executing deployment..."
           sleep 2
-          echo "Deployment successful"
 
       - name: Notify backend success
         run: |
-          curl -v -X PATCH "https://multi-cloud-governance-platform.onrender.com/deployments/${{ github.event.client_payload.deployment_id }}/status" \
+          curl -v --fail -X PATCH "https://multi-cloud-governance-platform.onrender.com/deployments/${{ github.event.client_payload.deployment_id }}/status" \
             -H "Content-Type: application/json" \
-            -H "x-pipeline-token: ${{ secrets.super_secret_token }}" \
-            -d '{"status": "SUCCESS"}'
-
+            -H "x-pipeline-token: ${{ secrets.PIPELINE_TOKEN }}" \
+            -d '{"status":"SUCCESS"}'

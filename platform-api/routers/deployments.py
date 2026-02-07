@@ -4,6 +4,9 @@ from models.request import CreateDeploymentRequest, UpdateStatusRequest
 from services.policy_validator import validate_request
 from services.pipeline_trigger import trigger_pipeline
 from services.deployment_store import save, get_all, get_by_id, update_status
+import os
+
+PIPELINE_TOKEN = os.getenv("PIPELINE_TOKEN")
 
 router = APIRouter(prefix="/deployments")
 
@@ -55,7 +58,7 @@ def update_deployment_status(
     x_pipeline_token: str = Header(None)
 ):
     # Simple security check to ensure only the pipeline calls this
-    if x_pipeline_token != "super-secret-token":
+    if x_pipeline_token !=PIPELINE_TOKEN:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     data = get_by_id(deployment_id)
