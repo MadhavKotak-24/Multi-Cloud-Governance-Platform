@@ -32,8 +32,8 @@ jobs:
 
       - name: Notify backend success
         run: |
-          curl -X PATCH "https://YOUR_RENDER_URL/deployments/${{ github.event.client_payload.deployment_id }}/status" \
+          curl -X PATCH "https://multi-cloud-governance-platform.onrender.com//deployments/${{ github.event.client_payload.deployment_id }}/status" \
             -H "Content-Type: application/json" \
-            -H "x-pipeline-token: ${{ secrets.PIPELINE_TOKEN }}" \
+            -H "x-pipeline-token: ${{ secrets.super-secret-token }}" \
             -d '{"status": "SUCCESS"}'
 
