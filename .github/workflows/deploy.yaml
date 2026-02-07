@@ -27,6 +27,14 @@ jobs:
           echo "Executing deployment..."
           sleep 2
 
+      - name: Notify backend IN_PROGRESS
+        run: |
+          curl -X PATCH "https://multi-cloud-governance-platform.onrender.com/deployments/${{ github.event.client_payload.deployment_id }}/status" \
+            -H "Content-Type: application/json" \
+            -H "x-pipeline-token: ${{ secrets.PIPELINE_TOKEN }}" \
+            -d '{"status":"IN_PROGRESS"}'
+
+
       - name: Notify backend success
         run: |
           echo "Deployment ID: ${{ github.event.client_payload.deployment_id }}"
