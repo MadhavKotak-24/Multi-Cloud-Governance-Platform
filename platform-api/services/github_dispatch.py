@@ -20,7 +20,7 @@ def trigger_github_pipeline(deployment):
     payload = {
         "event_type": "platform-deploy",
         "client_payload": {
-            "deployment_id": deployment.id,
+            "deployment_id": str(deployment.id),
             "cloud": deployment.cloud,
             "environment": deployment.environment,
             "application": deployment.application
@@ -37,3 +37,6 @@ def trigger_github_pipeline(deployment):
         print(f"GitHub pipeline triggered for deployment {deployment.id}")
     except requests.exceptions.RequestException as e:
         print(f"Failed to trigger GitHub pipeline: {e}")
+
+    print("PAYLOAD:", payload)
+
