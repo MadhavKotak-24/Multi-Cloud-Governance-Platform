@@ -11,8 +11,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Debug event
-        run: echo "${{ toJson(github.event) }}"
+      - name: Debug full Github event
+        run: |
+          echo "FULL EVENT:"
+          echo '${{ toJson(github.event) }}'
 
       - name: Print deployment context
         run: |
