@@ -2,12 +2,12 @@ import os
 import requests
 
 def trigger_github_pipeline(deployment):
-    token = os.environ.get("GITHUB_TOKEN")
+    token = os.environ.get("PAT_TOKEN")
     owner = os.environ.get("REPO_OWNER")
     repo = os.environ.get("REPO_NAME")
 
     if not all([token, owner, repo]):
-        print("Skipping GitHub dispatch: Missing GITHUB_TOKEN, REPO_OWNER, or REPO_NAME.")
+        print("Skipping GitHub dispatch: Missing PAT_TOKEN, REPO_OWNER, or REPO_NAME.")
         return
 
     url = f"https://api.github.com/repos/{owner}/{repo}/dispatches"
