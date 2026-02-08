@@ -374,31 +374,6 @@
         // CONFIG
         const API_BASE_URL = 'https://multi-cloud-governance-platform.onrender.com';
 
-        // ============================
-        // WEBSOCKET CLIENT
-        // ============================
-        const ws = new WebSocket("wss://multi-cloud-governance-platform.onrender.com/ws");
-
-        ws.onopen = () => {
-            console.log("WebSocket connected");
-        };
-
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-
-            console.log("WS update:", data);
-
-            // Update timeline if currently selected
-            if (selectedDeploymentId === data.deployment_id) {
-                fetchData(); // reload latest events
-            }
-        };
-
-        ws.onclose = () => {
-            console.log("WebSocket closed");
-        };
-
-
         // STATIC POLICIES CONFIG
         async function loadPolicies() {
             try {
@@ -484,6 +459,9 @@
             initNavigation();
             loadPolicies();
             fetchData();
+
+            setInterval(fetchData, 3000);
+
 
             if(el.submitBtn) el.submitBtn.addEventListener('click', handleSubmit);
         });

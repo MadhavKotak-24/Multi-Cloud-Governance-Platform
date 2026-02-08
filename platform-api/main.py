@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI
 from routers.deployments import router as deployment_router
 from fastapi.middleware.cors import CORSMiddleware
 from routers.policies import router as policy_router
@@ -37,12 +37,4 @@ def health():
 def root():
     return {"message": "Cloud Governance API running"}
 
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await manager.connect(websocket)
-    try:
-        while True:
-            await websocket.receive_text()
-    except WebSocketDisconnect:
-        manager.disconnect(websocket)
 
