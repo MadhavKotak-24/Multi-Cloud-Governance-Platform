@@ -22,10 +22,32 @@ jobs:
           echo "Environment: ${{ github.event.client_payload.environment }}"
           echo "Application: ${{ github.event.client_payload.application }}"
 
-      - name: Execution (mock)
+      - name: Mark IN_PROGRESS
         run: |
-          echo "Executing deployment..."
-          sleep 2
+          curl -X PATCH "https://multi-cloud-governance-platform.onrender.com/deployments/${{ github.event.client_payload.deployment_id }}/status" \
+            -H "Content-Type: application/json" \
+            -H "x-pipeline-token: ${{ secrets.PIPELINE_TOKEN }}" \
+            -d '{"status":"IN_PROGRESS"}'
+
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: |
+          cd terraform/aws
+          terraform init
+
+      - name: Terraform Apply
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          cd terraform/aws
+          terraform apply -auto-approve \
+            -var="application=${{ github.event.client_payload.application }}" \
+            -var="environment=${{ github.event.client_payload.environment }}"
+
 
       - name: Notify backend IN_PROGRESS
         run: |

@@ -4,6 +4,7 @@ from models.request import CreateDeploymentRequest, UpdateStatusRequest
 from services.policy_validator import validate_request
 from services.pipeline_trigger import trigger_pipeline
 from services.deployment_store import save, get_all, get_by_id, update_status
+from services.ws_manager import manager
 import os
 
 PIPELINE_TOKEN = os.getenv("PIPELINE_TOKEN")
@@ -52,7 +53,7 @@ def get_deployment(deployment_id: str):
     return deployment
 
 @router.patch("/{deployment_id}/status")
-def update_deployment_status(
+async def update_deployment_status(
     deployment_id: str,
     request: UpdateStatusRequest,
     x_pipeline_token: str = Header(None)
@@ -75,5 +76,10 @@ def update_deployment_status(
 
     # Persist the new status and the latest event
     update_status(deployment.id, deployment.status.value, deployment.events[-1])
+
+    await manager.broadcast({
+        "deployment_id": deployment.id,
+        "status": deployment.status.value
+    })
 
     return deployment.to_dict()
