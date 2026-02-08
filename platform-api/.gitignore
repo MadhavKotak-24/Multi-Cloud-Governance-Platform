@@ -1,0 +1,56 @@
+# =========================
+# ENV & SECRETS
+# =========================
+.env
+.env.*
+*.env
+
+# Terraform variable files (often contain secrets)
+*.tfvars
+*.tfvars.json
+
+# AWS credentials
+.aws/
+credentials
+config
+
+# =========================
+# TOKENS / KEYS
+# =========================
+secrets.json
+keys.json
+*.pem
+*.key
+
+# =========================
+# PYTHON
+# =========================
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# =========================
+# NODE
+# =========================
+node_modules/
+
+# =========================
+# IDE
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# OS
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# TERRAFORM
+# =========================
+.terraform/
+terraform.tfstate
+terraform.tfstate.*
+.terraform.lock.hcl
