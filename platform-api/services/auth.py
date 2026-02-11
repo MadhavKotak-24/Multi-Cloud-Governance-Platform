@@ -28,9 +28,9 @@ def verify_token(token: str):
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-def get_current_user(auth: str = Header(None)):
-    if not auth or not auth.startswith("Bearer "):
+def get_current_user(authorization: str = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Missing auth")
 
-    token = auth.split(" ")[1]
+    token = authorization.split(" ")[1]
     verify_token(token)
