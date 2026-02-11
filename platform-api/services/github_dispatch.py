@@ -13,7 +13,7 @@ def trigger_github_pipeline(deployment):
     url = f"https://api.github.com/repos/{owner}/{repo}/dispatches"
     
     headers = {
-        "Authorization": f"Bearer {token}",
+        "Authorization": f"token {token}",
         "Accept": "application/vnd.github.v3+json"
     }
     
