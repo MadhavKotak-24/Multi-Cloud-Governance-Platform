@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 from jose import jwt, JWTError
 from fastapi import HTTPException, Depends, Header
-
-SECRET = "super-secret-key"  # move to env later
+import os
+SECRET = os.getenv("SECRET")  # move to env later
 ALGO = "HS256"
 
 DEMO_USER = {
