@@ -2,8 +2,11 @@ from datetime import datetime, timedelta
 from jose import jwt, JWTError
 from fastapi import HTTPException, Depends, Header
 import os
-SECRET = os.getenv("SECRET")  # move to env later
+JWT_SECRET = os.getenv("JWT_SECRET")  # move to env later
 ALGO = "HS256"
+
+if not SECRET:
+    raise RuntimeError("SECRET_KEY not set in environment")
 
 DEMO_USER = {
     "username": "admin",
@@ -19,7 +22,7 @@ def create_token(username: str):
 
 def verify_token(token: str):
     try:
-        jwt.decode(token, SECRET, algorithms=[ALGO])
+        return jwt.decode(token, SECRET, algorithms=[ALGO])
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
