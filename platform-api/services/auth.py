@@ -2,10 +2,12 @@ from datetime import datetime, timedelta
 from jose import jwt, JWTError
 from fastapi import HTTPException, Depends, Header
 import os
-JWT_SECRET = os.getenv("JWT_SECRET")  # move to env later
+JWT_SECRET = os.getenv("JWT_SECRET") 
+print("SECRET LOADED:", JWT_SECRET)
+ # move to env later
 ALGO = "HS256"
 
-if not SECRET:
+if not JWT_SECRET:
     raise RuntimeError("SECRET_KEY not set in environment")
 
 DEMO_USER = {
@@ -18,11 +20,11 @@ def create_token(username: str):
         "sub": username,
         "exp": datetime.utcnow() + timedelta(hours=4)
     }
-    return jwt.encode(payload, SECRET, algorithm=ALGO)
+    return jwt.encode(payload, JWT_SECRET, algorithm=ALGO)
 
 def verify_token(token: str):
     try:
-        return jwt.decode(token, SECRET, algorithms=[ALGO])
+        return jwt.decode(token, JWT_SECRET, algorithms=[ALGO])
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
