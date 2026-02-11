@@ -1,37 +1,104 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login</title>
+<meta charset="UTF-8">
+<title>CloudGov Login</title>
+
+<style>
+body{
+    font-family: Arial;
+    background: linear-gradient(135deg,#2563eb,#1e3a8a);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    margin:0;
+}
+
+.card{
+    background:white;
+    padding:40px;
+    border-radius:10px;
+    width:320px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+
+h2{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+input{
+    width:100%;
+    padding:10px;
+    margin:10px 0;
+    border:1px solid #ddd;
+    border-radius:6px;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    background:#2563eb;
+    color:white;
+    border:none;
+    border-radius:6px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#1d4ed8;
+}
+
+.error{
+    color:red;
+    font-size:14px;
+    text-align:center;
+}
+</style>
 </head>
+
 <body>
 
+<div class="card">
 <h2>CloudGov Login</h2>
 
 <input id="user" placeholder="Username">
 <input id="pass" type="password" placeholder="Password">
+
 <button onclick="login()">Login</button>
 
+<p id="err" class="error"></p>
+</div>
+
 <script>
+
 const API = "https://multi-cloud-governance-platform.onrender.com";
 
 async function login(){
-    const res = await fetch(API + "/deployments/login", {
+
+    const username = document.getElementById("user").value;
+    const password = document.getElementById("pass").value;
+
+    const res = await fetch(API+"/deployments/login",{
         method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({
-            username: user.value,
-            password: pass.value
-        })
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({username,password})
     });
+
+    if(!res.ok){
+        document.getElementById("err").innerText="Invalid credentials";
+        return;
+    }
 
     const data = await res.json();
 
-    if(data.token){
-        localStorage.setItem("token", data.token);
-        window.location.href = "/index.html";
-    } else {
-        alert("Login failed");
-    }
+    localStorage.setItem("token",data.token);
+
+    window.location.href="/index.html";
 }
 </script>
 

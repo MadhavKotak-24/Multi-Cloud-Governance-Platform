@@ -57,6 +57,7 @@
         .nav-links a {
             color: #cbd5e1; text-decoration: none; font-size: 0.9rem; font-weight: 500;
             padding-bottom: 2px; border-bottom: 2px solid transparent; transition: all 0.2s;
+            
         }
         .nav-links a:hover, .nav-links a.active { color: white; border-bottom-color: white; }
 
@@ -178,9 +179,8 @@
                 <div class="health-dot"></div>Platform Healthy
             </div>
 
-            <button id="logoutBtn"
-                style="background:#ef4444;color:white;border:none;
-                padding:6px 12px;border-radius:6px;cursor:pointer;">
+            <button onclick="logout()"
+                style="margin-left:15px;padding:6px 12px;border:none;border-radius:6px;cursor:pointer;background:#ef4444;color:white;">
                 Logout
             </button>
         </div>
@@ -376,11 +376,15 @@
     </div>
 
     <script>
-        const token = localStorage.getItem("token");
+        function getAuthHeaders(){
+            const token = localStorage.getItem("token");
 
-        if (!token) {
-            window.location.href = "/login.html";
+            return {
+                "Content-Type":"application/json",
+                "Authorization":"Bearer " + token
+            };
         }
+
 
 
         function parseBackendTime(ts) {
@@ -521,6 +525,32 @@
         //Deleted
 
         // 3. DEPLOYMENT & TIMELINE LOGIC
+
+        async function authFetch(url, options = {}) {
+
+            const token = localStorage.getItem("token");
+
+            if (!token) {
+                window.location.href = "/login.html";
+                return;
+            }
+
+            options.headers = {
+                ...(options.headers || {}),
+                "Authorization": "Bearer " + token
+            };
+
+            const res = await fetch(url, options);
+
+            if (res.status === 401) {
+                localStorage.removeItem("token");
+                window.location.href = "/login.html";
+                return;
+            }
+
+            return res;
+        }
+
         async function fetchData() {
             try {
                 // Try fetching from backend
@@ -638,7 +668,9 @@
                 // Success Simulation
                 const res = await authFetch(`${API_BASE_URL}/deployments/`, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: {
+                         "Content-Type": "application/json" 
+                    },
                     body: JSON.stringify({
                         cloud: payload.cloud_provider,
                         environment: payload.environment,
@@ -707,7 +739,8 @@
         setInterval(checkHealth, 10000);
 
         // Logout logic
-        document.getElementById("logoutBtn").onclick = () => {
+
+        function logout() {
             localStorage.removeItem("token");
             window.location.href = "/login.html";
         };
