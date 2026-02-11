@@ -100,8 +100,10 @@ async function login(){
 
 
     localStorage.setItem("token",data.token);
+    console.log("TOKEN SAVED:", data.token);
+    console.log("STORED:", localStorage.getItem("token"));
 
-    window.location.href="index.html";
+    window.location.href="/index.html";
 }
 </script>
 
