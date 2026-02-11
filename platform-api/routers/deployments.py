@@ -1,22 +1,38 @@
-from fastapi import APIRouter, HTTPException, Header
+from fastapi import APIRouter, HTTPException, Header, Depends
 from models.deployment import Deployment, DeploymentStatus
 from models.request import CreateDeploymentRequest, UpdateStatusRequest
 from services.policy_validator import validate_request
 from services.pipeline_trigger import trigger_pipeline
 from services.deployment_store import save, get_all, get_by_id, update_status
+from services.auth import create_token, DEMO_USER, get_current_user
+from pydantic import BaseModel
 import os
 
 PIPELINE_TOKEN = os.getenv("PIPELINE_TOKEN")
 
 router = APIRouter(prefix="/deployments")
 
+# ---------------- LOGIN ---------------- #
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+@router.post("/login")
+def login(req: LoginRequest):
+    if req.username != DEMO_USER["username"] or req.password != DEMO_USER["password"]:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    token = create_token(req.username)
+    return {"token": token}
+
+# ---------------- DEPLOYMENTS ---------------- #
 
 @router.post("/")
-def create_deployment(request: CreateDeploymentRequest):
-    """
-    Receives a deployment request, validates it against policies,
-    and if valid, creates a deployment record and triggers the execution pipeline.
-    """
+def create_deployment(
+    request: CreateDeploymentRequest,
+    user=Depends(get_current_user)   # protect
+):
     try:
         validate_request(
             request.cloud,
@@ -32,7 +48,6 @@ def create_deployment(request: CreateDeploymentRequest):
         request.application
     )
 
-    # The state is now REQUESTED. Let's validate and transition.
     deployment.transition_to_validated()
     save(deployment)
 
@@ -40,16 +55,19 @@ def create_deployment(request: CreateDeploymentRequest):
 
     return deployment.to_dict()
 
+
 @router.get("/")
-def list_deployments():
+def list_deployments(user=Depends(get_current_user)):
     return get_all()
 
+
 @router.get("/{deployment_id}")
-def get_deployment(deployment_id: str):
+def get_deployment(deployment_id: str, user=Depends(get_current_user)):
     deployment = get_by_id(deployment_id)
     if not deployment:
         raise HTTPException(status_code=404, detail="Not found")
     return deployment
+
 
 @router.patch("/{deployment_id}/status")
 def update_deployment_status(
@@ -57,8 +75,7 @@ def update_deployment_status(
     request: UpdateStatusRequest,
     x_pipeline_token: str = Header(None)
 ):
-    # Simple security check to ensure only the pipeline calls this
-    if x_pipeline_token !=PIPELINE_TOKEN:
+    if x_pipeline_token != PIPELINE_TOKEN:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     data = get_by_id(deployment_id)
@@ -73,7 +90,6 @@ def update_deployment_status(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    # Persist the new status and the latest event
     update_status(deployment.id, deployment.status.value, deployment.events[-1])
 
     return deployment.to_dict()

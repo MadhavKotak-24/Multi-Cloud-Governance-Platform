@@ -173,7 +173,18 @@
             <a href="#">Policies</a>
             <a href="#">Settings</a>
         </nav>
-        <div class="health-badge"><div class="health-dot"></div>Platform Healthy</div>
+        <div style="display:flex; gap:12px; align-items:center;">
+            <div class="health-badge">
+                <div class="health-dot"></div>Platform Healthy
+            </div>
+
+            <button id="logoutBtn"
+                style="background:#ef4444;color:white;border:none;
+                padding:6px 12px;border-radius:6px;cursor:pointer;">
+                Logout
+            </button>
+        </div>
+
     </header>
 
     <main>
@@ -305,17 +316,22 @@
                     <div class="card-body">
                         <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
                             <span>Email on Failure</span>
-                            <div class="toggle-switch toggle-active"></div>
+                            <div id="emailToggle" class="toggle-switch toggle-active"></div>
                         </div>
 
                         <div style="display:flex; justify-content:space-between;">
                             <span>Slack Alerts (#devops)</span>
-                            <div class="toggle-switch"></div>
+                            <div id="slackToggle" class="toggle-switch"></div>
                         </div>
 
                         <p style="margin-top:1rem; color:var(--text-muted); font-size:0.85rem;">
                             Notifications are triggered by CI/CD pipeline events.
                         </p>
+
+                        <p style="font-size:0.8rem;color:var(--text-muted);margin-top:1rem;">
+                            Demo notification settings (UI simulation)
+                        </p>
+
                     </div>
                 </div>
 
@@ -360,6 +376,13 @@
     </div>
 
     <script>
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            window.location.href = "/login.html";
+        }
+
+
         function parseBackendTime(ts) {
             if (!ts) return null;
 
@@ -374,10 +397,23 @@
         // CONFIG
         const API_BASE_URL = 'https://multi-cloud-governance-platform.onrender.com';
 
+        function authFetch(url, options = {}) {
+            const token = localStorage.getItem("token");
+
+            options.headers = {
+                ...(options.headers || {}),
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json"
+            };
+
+            return fetch(url, options);
+        }
+
+
         // STATIC POLICIES CONFIG
         async function loadPolicies() {
             try {
-                const res = await fetch(`${API_BASE_URL}/policies`);
+                const res = await authFetch(`${API_BASE_URL}/policies`);
                 if (!res.ok) throw new Error("Failed to load policies");
                 const policies = await res.json();
                 renderPolicies(policies);
@@ -488,7 +524,7 @@
         async function fetchData() {
             try {
                 // Try fetching from backend
-                const res = await fetch(`${API_BASE_URL}/deployments/`);
+                const res = await authFetch(`${API_BASE_URL}/deployments/`);
                 if(!res.ok) throw new Error("Offline");
                 const data = await res.json();
                 renderData(data);
@@ -600,7 +636,7 @@
                 if(payload.environment === 'prod') throw { detail: "Policy Violation: Prod requires approval (POL-01)" };
 
                 // Success Simulation
-                const res = await fetch(`${API_BASE_URL}/deployments/`, {
+                const res = await authFetch(`${API_BASE_URL}/deployments/`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -624,6 +660,60 @@
                 el.submitBtn.textContent = "Initiate Deployment";
             }
         }
+
+        // Notification toggles
+        const emailToggle = document.getElementById("emailToggle");
+        const slackToggle = document.getElementById("slackToggle");
+
+        // Load saved state
+        if(localStorage.getItem("emailAlerts") === "true")
+            emailToggle.classList.add("toggle-active");
+
+        if(localStorage.getItem("slackAlerts") === "true")
+            slackToggle.classList.add("toggle-active");
+
+        // Click handlers
+        emailToggle.onclick = () => {
+            emailToggle.classList.toggle("toggle-active");
+            localStorage.setItem(
+                "emailAlerts",
+                emailToggle.classList.contains("toggle-active")
+            );
+        };
+
+        slackToggle.onclick = () => {
+            slackToggle.classList.toggle("toggle-active");
+            localStorage.setItem(
+                "slackAlerts",
+                slackToggle.classList.contains("toggle-active")
+            );
+        };
+
+        async function checkHealth() {
+            try {
+                const res = await authFetch(API_BASE_URL + "/deployments/");
+                if(!res.ok) throw new Error();
+
+                document.querySelector(".health-badge").innerHTML =
+                    '<div class="health-dot"></div>Platform Healthy';
+
+            } catch {
+                document.querySelector(".health-badge").innerHTML =
+                    '<div class="health-dot" style="background:red"></div>Backend Offline';
+            }
+        }
+
+        checkHealth();
+        setInterval(checkHealth, 10000);
+
+        // Logout logic
+        document.getElementById("logoutBtn").onclick = () => {
+            localStorage.removeItem("token");
+            window.location.href = "/login.html";
+        };
+
+
+
     </script>
 </body>
 </html>
