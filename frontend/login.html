@@ -93,8 +93,11 @@ async function login(){
         document.getElementById("err").innerText="Invalid credentials";
         return;
     }
-
+    
+    console.log("STATUS:", res.status);
     const data = await res.json();
+    console.log("DATA:", data);
+
 
     localStorage.setItem("token",data.token);
 
