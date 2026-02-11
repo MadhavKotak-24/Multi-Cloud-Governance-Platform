@@ -376,6 +376,10 @@
     </div>
 
     <script>
+        if (!localStorage.getItem("token")) {
+            window.location.href = "login.html";
+        }
+
         function getAuthHeaders(){
             const token = localStorage.getItem("token");
 
@@ -400,19 +404,6 @@
 
         // CONFIG
         const API_BASE_URL = 'https://multi-cloud-governance-platform.onrender.com';
-
-        function authFetch(url, options = {}) {
-            const token = localStorage.getItem("token");
-
-            options.headers = {
-                ...(options.headers || {}),
-                "Authorization": "Bearer " + token,
-                "Content-Type": "application/json"
-            };
-
-            return fetch(url, options);
-        }
-
 
         // STATIC POLICIES CONFIG
         async function loadPolicies() {
@@ -531,20 +522,21 @@
             const token = localStorage.getItem("token");
 
             if (!token) {
-                window.location.href = "/login.html";
+                window.location.href = "login.html";
                 return;
             }
 
             options.headers = {
                 ...(options.headers || {}),
-                "Authorization": "Bearer " + token
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json"
             };
 
             const res = await fetch(url, options);
 
             if (res.status === 401) {
                 localStorage.removeItem("token");
-                window.location.href = "/login.html";
+                window.location.href = "login.html";
                 return;
             }
 
@@ -742,7 +734,7 @@
 
         function logout() {
             localStorage.removeItem("token");
-            window.location.href = "/login.html";
+            window.location.href = "login.html";
         };
 
 
