@@ -421,10 +421,6 @@
 
         }
 
-        if (!DEMO_MODE_UI && !localStorage.getItem("token")) {
-            window.location.href = "login.html";
-        }
-
         function getAuthHeaders(){
             const token = localStorage.getItem("token");
 
