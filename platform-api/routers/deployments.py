@@ -72,7 +72,7 @@ def create_deployment(
             "cloud": request.cloud,
             "environment": request.environment,
             "application": request.application,
-            "created_at": datetime.utcnow(),
+            "created_at": datetime.now(),
         }
 
         return {
@@ -81,7 +81,7 @@ def create_deployment(
             "environment": request.environment,
             "application": request.application,
             "status": "REQUESTED",
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now().isoformat(),
             "events": [
                 {
                     "status": "REQUESTED",
@@ -124,11 +124,13 @@ def list_deployments(user=Depends(get_current_user)):
             status = DEMO_STAGES[stage_index]
 
             events = []
-            for i in range(stage_index + 1):
-                events.append({
-                    "status": DEMO_STAGES[i],
-                    "time": dep["created_at"].isoformat()
-                })
+        for i in range(stage_index + 1):
+            stage_time = dep["created_at"] + timedelta(seconds=i * STAGE_INTERVAL)
+
+            events.append({
+                "status": DEMO_STAGES[i],
+                "time": stage_time.isoformat()
+            })
 
             results.append({
                 "id": dep["id"],

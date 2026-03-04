@@ -190,7 +190,7 @@
                 <div class="health-dot"></div>Platform Healthy
             </div>
 
-            <button onclick="logout()"
+            <button id="logoutBtn" onclick="logout()">
                 style="margin-left:15px;padding:6px 12px;border:none;border-radius:6px;cursor:pointer;background:#ef4444;color:white;">
                 Logout
             </button>
@@ -394,7 +394,34 @@
     </div>
 
     <script>
-        if (!localStorage.getItem("token")) {
+
+        let DEMO_MODE_UI = false;
+
+        async function loadConfig() {
+
+            try {
+                const res = await fetch(API_BASE_URL + "/config");
+                const cfg = await res.json();
+
+                DEMO_MODE_UI = cfg.demo_mode;
+
+                if (!DEMO_MODE_UI && !localStorage.getItem("token")) {
+                    window.location.href = "login.html";
+                }
+
+                if (!DEMO_MODE_UI) {
+                    document.getElementById("demo-banner")?.remove();
+                } else {
+                    document.getElementById("logoutBtn")?.remove();
+                }
+
+            } catch {
+                console.warn("Config load failed");
+            }
+
+        }
+
+        if (!DEMO_MODE_UI && !localStorage.getItem("token")) {
             window.location.href = "login.html";
         }
 
@@ -424,8 +451,7 @@
         const API_BASE_URL = 'https://multi-cloud-governance-platform.onrender.com';
 
         // ===== Demo banner toggle =====
-        // Set to false only if you ever run real infra publicly
-        const DEMO_MODE_UI = true;
+
 
         if (!DEMO_MODE_UI) {
             document.getElementById("demo-banner")?.remove();
@@ -512,7 +538,10 @@
         let selectedDeploymentId = null;
 
         // INIT
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+
+            await loadConfig();
+
             initNavigation();
             loadPolicies();
             fetchData();
@@ -545,6 +574,10 @@
 
         async function authFetch(url, options = {}) {
 
+            if (DEMO_MODE_UI) {
+                return fetch(url, options);   // No auth in demo
+            }
+
             const token = localStorage.getItem("token");
 
             if (!token) {
@@ -557,16 +590,8 @@
                 "Authorization": "Bearer " + token,
                 "Content-Type": "application/json"
             };
-
-            const res = await fetch(url, options);
-
-            if (res.status === 401) {
-                localStorage.removeItem("token");
-                window.location.href = "login.html";
-                return;
-            }
-
-            return res;
+            
+            return fetch(url, options);
         }
 
         async function fetchData() {

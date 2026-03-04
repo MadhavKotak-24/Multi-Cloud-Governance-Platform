@@ -3,7 +3,7 @@ from routers.deployments import router as deployment_router
 from fastapi.middleware.cors import CORSMiddleware
 from routers.policies import router as policy_router
 from dotenv import load_dotenv
-
+import os
 import logging
 
 logging.basicConfig(
@@ -16,7 +16,7 @@ logging.basicConfig(
 load_dotenv()
 
 app = FastAPI(title="Multi-Cloud Governance Platform")
-
+DEMO_MODE = os.getenv("DEMO_MODE", "true").lower() == "true"
 
 app.add_middleware(
     CORSMiddleware,
@@ -37,4 +37,8 @@ def health():
 def root():
     return {"message": "Cloud Governance API running"}
 
-
+@app.get("/config")
+def config():
+    return {
+        "demo_mode": DEMO_MODE
+    }
