@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Multi-Cloud Governance Platform</title>
     <style>
+
         /* * =========================================
          * CSS VARIABLES & RESET
          * =========================================
@@ -36,7 +37,7 @@
             color: var(--text-main);
             line-height: 1.5;
             min-height: 100vh;
-            display: flex;
+            display: none;
             flex-direction: column;
         }
 
@@ -403,25 +404,43 @@
         async function loadConfig() {
 
             try {
+
                 const res = await fetch(API_BASE_URL + "/config");
                 const cfg = await res.json();
 
                 DEMO_MODE_UI = cfg.demo_mode;
 
-                if (!DEMO_MODE_UI && !sessionStorage.getItem("token")) {
-                    window.location.href = "login.html";
-                }
+                if (DEMO_MODE_UI) {
 
-                if (!DEMO_MODE_UI) {
-                    document.getElementById("demo-banner")?.remove();
-                } else {
+                    // Demo mode
                     document.getElementById("logoutBtn")?.remove();
+
+                } else {
+
+                    // Real infra mode
+                    document.getElementById("demo-banner")?.remove();
+
+                    if (!sessionStorage.getItem("token")) {
+                        window.location.replace("login.html");
+                        return;
+                    }
+
+                }
+                
+                document.body.style.display = "flex";
+
+            } catch (err) {
+
+                console.error("Config load failed", err);
+
+                // fallback safety
+                if (!sessionStorage.getItem("token")) {
+                    window.location.replace("login.html");
                 }
 
-            } catch {
-                console.warn("Config load failed");
-            }
+                document.body.style.display = "flex";
 
+            }
         }
 
         function parseBackendTime(ts) {
@@ -433,15 +452,6 @@
             const d = new Date(ts);
 
             return isNaN(d.getTime()) ? null : d;
-        }
-
-        
-
-        // ===== Demo banner toggle =====
-
-
-        if (!DEMO_MODE_UI) {
-            document.getElementById("demo-banner")?.remove();
         }
 
         // STATIC POLICIES CONFIG
