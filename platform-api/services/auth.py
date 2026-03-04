@@ -33,4 +33,4 @@ def get_current_user(authorization: str = Header(None)):
         raise HTTPException(status_code=401, detail="Missing auth")
 
     token = authorization.split(" ")[1]
-    verify_token(token)
+    return verify_token(token)

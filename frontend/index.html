@@ -73,6 +73,17 @@
             display: grid; grid-template-columns: 350px 1fr; grid-template-rows: auto 1fr; gap: 1.5rem;
         }
 
+        /* Demo Mode Banner */
+        .demo-banner {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 0.85rem;
+            border-bottom: 1px solid #fde68a;
+            font-weight: 500;
+        }
+
         /* View Utility: display: contents preserves grid layout */
         .view-section { display: contents; }
         .hidden { display: none !important; }
@@ -186,6 +197,10 @@
         </div>
 
     </header>
+
+    <div id="demo-banner" class="demo-banner">
+        ⚠️ Demo Mode — No real cloud resources are created. Deployments are simulated.
+    </div>
 
     <main>
 
@@ -407,6 +422,14 @@
 
         // CONFIG
         const API_BASE_URL = 'https://multi-cloud-governance-platform.onrender.com';
+
+        // ===== Demo banner toggle =====
+        // Set to false only if you ever run real infra publicly
+        const DEMO_MODE_UI = true;
+
+        if (!DEMO_MODE_UI) {
+            document.getElementById("demo-banner")?.remove();
+        }
 
         // STATIC POLICIES CONFIG
         async function loadPolicies() {

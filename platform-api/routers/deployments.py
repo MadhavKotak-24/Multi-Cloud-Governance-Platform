@@ -7,8 +7,27 @@ from services.deployment_store import save, get_all, get_by_id, update_status
 from services.auth import create_token, DEMO_USER, get_current_user
 from pydantic import BaseModel
 import os
+import uuid
+from datetime import datetime
 
 PIPELINE_TOKEN = os.getenv("PIPELINE_TOKEN")
+
+# ===============================
+# DEMO MODE CONFIG
+# ===============================
+DEMO_MODE = os.getenv("DEMO_MODE", "true").lower() == "true"
+
+DEMO_DEPLOYMENTS = {}
+
+DEMO_STAGES = [
+    "REQUESTED",
+    "VALIDATED",
+    "IN_PROGRESS",
+    "SUCCESS"
+]
+
+STAGE_INTERVAL = 3  # seconds per stage
+
 
 router = APIRouter(prefix="/deployments")
 
@@ -41,6 +60,39 @@ def create_deployment(
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+    
+    # ===============================
+    # DEMO MODE PATH
+    # ===============================
+    if DEMO_MODE:
+        dep_id = f"DEP-{uuid.uuid4().hex[:6].upper()}"
+
+        DEMO_DEPLOYMENTS[dep_id] = {
+            "id": dep_id,
+            "cloud": request.cloud,
+            "environment": request.environment,
+            "application": request.application,
+            "created_at": datetime.utcnow(),
+        }
+
+        return {
+            "id": dep_id,
+            "cloud": request.cloud,
+            "environment": request.environment,
+            "application": request.application,
+            "status": "REQUESTED",
+            "created_at": datetime.utcnow().isoformat(),
+            "events": [
+                {
+                    "status": "REQUESTED",
+                    "time": datetime.utcnow().isoformat()
+                }
+            ]
+        }
+    
+    # ===============================
+    # REAL PATH (unchanged)
+    # ===============================
 
     deployment = Deployment(
         request.cloud,
@@ -58,6 +110,42 @@ def create_deployment(
 
 @router.get("/")
 def list_deployments(user=Depends(get_current_user)):
+
+    # ===============================
+    # DEMO MODE PATH
+    # ===============================
+    if DEMO_MODE:
+        results = []
+
+        for dep in DEMO_DEPLOYMENTS.values():
+            elapsed = (datetime.utcnow() - dep["created_at"]).total_seconds()
+            stage_index = min(int(elapsed // STAGE_INTERVAL), len(DEMO_STAGES) - 1)
+
+            status = DEMO_STAGES[stage_index]
+
+            events = []
+            for i in range(stage_index + 1):
+                events.append({
+                    "status": DEMO_STAGES[i],
+                    "time": dep["created_at"].isoformat()
+                })
+
+            results.append({
+                "id": dep["id"],
+                "cloud": dep["cloud"],
+                "environment": dep["environment"],
+                "application": dep["application"],
+                "status": status,
+                "created_at": dep["created_at"].isoformat(),
+                "events": events
+            })
+
+        return results
+
+    # ===============================
+    # REAL PATH
+    # ===============================
+
     return get_all()
 
 
