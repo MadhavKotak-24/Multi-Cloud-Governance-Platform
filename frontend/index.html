@@ -395,6 +395,9 @@
 
     <script>
 
+        // CONFIG
+        const API_BASE_URL = 'https://multi-cloud-governance-platform.onrender.com';
+
         let DEMO_MODE_UI = false;
 
         async function loadConfig() {
@@ -405,7 +408,7 @@
 
                 DEMO_MODE_UI = cfg.demo_mode;
 
-                if (!DEMO_MODE_UI && !localStorage.getItem("token")) {
+                if (!DEMO_MODE_UI && !sessionStorage.getItem("token")) {
                     window.location.href = "login.html";
                 }
 
@@ -421,17 +424,6 @@
 
         }
 
-        function getAuthHeaders(){
-            const token = localStorage.getItem("token");
-
-            return {
-                "Content-Type":"application/json",
-                "Authorization":"Bearer " + token
-            };
-        }
-
-
-
         function parseBackendTime(ts) {
             if (!ts) return null;
 
@@ -443,8 +435,7 @@
             return isNaN(d.getTime()) ? null : d;
         }
 
-        // CONFIG
-        const API_BASE_URL = 'https://multi-cloud-governance-platform.onrender.com';
+        
 
         // ===== Demo banner toggle =====
 
@@ -574,7 +565,7 @@
                 return fetch(url, options);   // No auth in demo
             }
 
-            const token = localStorage.getItem("token");
+            const token = sessionStorage.getItem("token");
 
             if (!token) {
                 window.location.href = "login.html";
