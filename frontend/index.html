@@ -590,7 +590,7 @@
                 "Authorization": "Bearer " + token,
                 "Content-Type": "application/json"
             };
-            
+
             return fetch(url, options);
         }
 
@@ -766,15 +766,22 @@
 
         async function checkHealth() {
             try {
-                const res = await authFetch(API_BASE_URL + "/deployments/");
+                const res = await authFetch(API_BASE_URL + "/health");
                 if(!res.ok) throw new Error();
 
-                document.querySelector(".health-badge").innerHTML =
-                    '<div class="health-dot"></div>Platform Healthy';
+                if (DEMO_MODE_UI) {
+                    document.querySelector(".health-badge").innerHTML =
+                        '<div class="health-dot"></div>Platform Healthy (Demo)';
+                } else {
+                    document.querySelector(".health-badge").innerHTML =
+                        '<div class="health-dot"></div>Platform Healthy';
+                }
 
             } catch {
+
                 document.querySelector(".health-badge").innerHTML =
                     '<div class="health-dot" style="background:red"></div>Backend Offline';
+
             }
         }
 
