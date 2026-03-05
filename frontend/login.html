@@ -76,6 +76,19 @@ button:hover{
 
 const API = "https://multi-cloud-governance-platform.onrender.com";
 
+// Check Demo Mode on load
+window.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const res = await fetch(API + "/config");
+        const data = await res.json();
+        if (data.demo_mode) {
+            window.location.href = "index.html";
+        }
+    } catch (e) {
+        console.error("Config check failed", e);
+    }
+});
+
 async function login(){
 
     const username = document.getElementById("user").value;

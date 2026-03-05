@@ -529,6 +529,8 @@
 
             await loadConfig();
 
+            document.body.style.display = 'flex'; // Make body visible after config/auth check
+
             initNavigation();
             loadPolicies();
             fetchData();
