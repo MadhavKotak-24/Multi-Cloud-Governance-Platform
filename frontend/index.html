@@ -690,14 +690,15 @@
         async function handleSubmit(e) {
             e.preventDefault();
             const payload = {
-                application_name: el.inputs.app.value,
-                cloud_provider: el.inputs.prov.value,
-                environment: el.inputs.env.value
-            };
+            application: el.inputs.app.value,
+            cloud: el.inputs.prov.value,
+            environment: el.inputs.env.value
+        };
 
-            if(!payload.application_name || !payload.cloud_provider || !payload.environment) {
-                alert("Fill all fields"); return;
-            }
+        if(!payload.application || !payload.cloud || !payload.environment){
+            alert("Fill all fields");
+            return;
+        }
 
             el.submitBtn.textContent = "Verifying...";
 
@@ -711,11 +712,7 @@
                     headers: {
                          "Content-Type": "application/json" 
                     },
-                    body: JSON.stringify({
-                        cloud: payload.cloud_provider,
-                        environment: payload.environment,
-                        application: payload.application_name
-                    })
+                    body: JSON.stringify(payload)   
                 });
 
                 if (!res.ok) {

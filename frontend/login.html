@@ -8,7 +8,7 @@
 body{
     font-family: Arial;
     background: linear-gradient(135deg,#2563eb,#1e3a8a);
-    display:flex;
+    display:none;
     justify-content:center;
     align-items:center;
     height:100vh;
@@ -76,6 +76,37 @@ button:hover{
 
 const API = "https://multi-cloud-governance-platform.onrender.com";
 
+async function checkMode(){
+
+    try{
+
+        const res = await fetch(API + "/config");
+        const cfg = await res.json();
+
+        if(cfg.demo_mode){
+            window.location.replace("/index.html");
+            return;
+        }
+
+        if(sessionStorage.getItem("token")){
+            window.location.replace("/index.html");
+            return;
+        }
+
+        document.body.style.display = "flex";
+
+    }catch(err){
+
+        console.error("Config check failed");
+
+        document.body.style.display = "flex";
+    }
+
+}
+
+checkMode();
+
+
 async function login(){
 
     const username = document.getElementById("user").value;
@@ -93,15 +124,10 @@ async function login(){
         document.getElementById("err").innerText="Invalid credentials";
         return;
     }
-    
-    console.log("STATUS:", res.status);
-    const data = await res.json();
-    console.log("DATA:", data);
 
+    const data = await res.json();
 
     sessionStorage.setItem("token",data.token);
-    console.log("TOKEN SAVED:", data.token);
-    console.log("STORED:", sessionStorage.getItem("token"));
 
     window.location.href="/index.html";
 }
