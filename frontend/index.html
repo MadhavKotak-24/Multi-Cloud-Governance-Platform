@@ -481,21 +481,20 @@
 
         // MOCK DATA (Fallback if backend offline)
         const MOCK_DATA = [
-            {
-                id: "DEP-8833", cloud: "azure", environment: "dev", application: "data-proc", status: "IN_PROGRESS", created_at: new Date().toISOString(),
-                events: [
-                    { title: "Request Received", time: new Date(Date.now() - 60000).toISOString(), desc: "Initiated by user" },
-                    { title: "Policy Check", time: new Date(Date.now() - 30000).toISOString(), desc: "OPA Policies Verified" },
-                    { title: "Terraform Apply", time: new Date().toISOString(), desc: "Provisioning Resources..." }
-                ]
-            },
-            {
-                id: "DEP-8832", cloud: "aws", environment: "prod", application: "user-auth", status: "SUCCESS", created_at: new Date(Date.now() - 3600000).toISOString(),
-                events: [
-                    { title: "Request Received", time: new Date(Date.now() - 3600000).toISOString(), desc: "Initiated by user" },
-                    { title: "Completion", time: new Date(Date.now() - 3500000).toISOString(), desc: "Deployment successful" }
-                ]
-            }
+        {
+            id:"DEP-demo1",
+            cloud:"aws",
+            environment:"dev",
+            application:"payment-service",
+            status:"SUCCESS",
+            created_at:new Date().toISOString(),
+            events:[
+                {status:"REQUESTED",time:new Date().toISOString()},
+                {status:"VALIDATED",time:new Date().toISOString()},
+                {status:"IN_PROGRESS",time:new Date().toISOString()},
+                {status:"SUCCESS",time:new Date().toISOString()}
+            ]
+        }
         ];
 
         // DOM CACHE
@@ -686,8 +685,8 @@
                         <div class="timeline-marker ${cls}"></div>
 
                         <div class="timeline-content">
-                            <h4>${evt.status.replaceAll("_", " ")}</h4>
-                            <p>Deployment status changed to ${evt.status}</p>
+                            <h4>${(evt.status || evt.title || "").replaceAll("_"," ")}</h4>
+                            <p>Deployment status changed to ${evt.status || evt.title}</p>
                             <div class="timeline-time">${displayTime}</div>
                         </div>
                     </div>
