@@ -83,6 +83,9 @@ async function checkMode(){
         const res = await fetch(API + "/config");
         const cfg = await res.json();
 
+        // show page first
+        document.body.style.display = "flex";
+
         if(cfg.demo_mode){
             window.location.replace("/index.html");
             return;
@@ -93,13 +96,12 @@ async function checkMode(){
             return;
         }
 
-        document.body.style.display = "flex";
-
     }catch(err){
 
         console.error("Config check failed");
 
         document.body.style.display = "flex";
+
     }
 
 }
