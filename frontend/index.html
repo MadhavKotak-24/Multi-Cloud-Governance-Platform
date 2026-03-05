@@ -592,24 +592,43 @@
         }
 
         async function fetchData() {
+
             try {
-                // Try fetching from backend
-                const res = await authFetch(`${API_BASE_URL}/deployments/`);
-                if(!res.ok) throw new Error("Offline");
-                const data = await res.json();
-                renderData(data);
-            } catch (e) {
-                console.error("Backend unreachable", e);
-                el.tables.dash.innerHTML = `
-                    <tr>
-                        <td colspan="6" style="text-align:center; color:var(--text-muted); padding:2rem;">
-                            Backend offline – no deployment data available
-                        </td>
-                    </tr>`;
+
+                // Demo mode → use simulated deployments
+                if (DEMO_MODE_UI) {
+                    renderData(MOCK_DATA);
+                    return;
                 }
 
-        }
+                // Real infrastructure mode
+                const res = await authFetch(`${API_BASE_URL}/deployments/`);
 
+                if(!res.ok) throw new Error("Backend error");
+
+                const data = await res.json();
+
+                renderData(data);
+
+            } catch (e) {
+
+                console.error("Backend unreachable", e);
+
+                // If backend fails but demo mode → still show mock deployments
+                if (DEMO_MODE_UI) {
+                    renderData(MOCK_DATA);
+                } else {
+                    el.tables.dash.innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem;">
+                                Backend offline – no deployment data available
+                            </td>
+                        </tr>`;
+                }
+
+            }
+
+        }
         function renderData(data) {
             const rowsHtml = data.map(dep => {
                 const provClass = dep.cloud.toLowerCase().includes('aws') ? 'aws-icon' : 'azure-icon';
@@ -706,6 +725,30 @@
                 // Simulate Backend/Mock logic
                 if(payload.environment === 'prod') throw { detail: "Policy Violation: Prod requires approval (POL-01)" };
 
+                // Demo mode simulation
+                if (DEMO_MODE_UI) {
+
+                    const newDeployment = {
+                        id: "DEP-" + Math.random().toString(16).slice(2,8),
+                        cloud: payload.cloud,
+                        environment: payload.environment,
+                        application: payload.application,
+                        status: "REQUESTED",
+                        created_at: new Date().toISOString(),
+                        events: [
+                            { status: "REQUESTED", time: new Date().toISOString() }
+                        ]
+                    };
+
+                    MOCK_DATA.unshift(newDeployment);
+
+                    renderData(MOCK_DATA);
+
+                    el.submitBtn.textContent = "Initiate Deployment";
+
+                    return;
+                }
+                
                 // Success Simulation
                 const res = await authFetch(`${API_BASE_URL}/deployments/`, {
                     method: "POST",
