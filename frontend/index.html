@@ -411,7 +411,7 @@
                 DEMO_MODE_UI = cfg.demo_mode;
 
                 // DEMO MODE
-                if (DEMO_MODE_UI) {
+                if (DEMO_MODE_UI === true) {
                     document.getElementById("logoutBtn")?.remove();
                     return;
                 }
@@ -420,7 +420,7 @@
                 const token = sessionStorage.getItem("token");
 
                 if (!token) {
-                    window.location.href = "/login.html";
+                    window.location.href = "login.html";
                     return;
                 }
 
