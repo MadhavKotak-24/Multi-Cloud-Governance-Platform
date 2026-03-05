@@ -8,7 +8,7 @@
 body{
     font-family: Arial;
     background: linear-gradient(135deg,#2563eb,#1e3a8a);
-    display:none;
+    display:flex;
     justify-content:center;
     align-items:center;
     height:100vh;
@@ -83,25 +83,19 @@ async function checkMode(){
         const res = await fetch(API + "/config");
         const cfg = await res.json();
 
-        // show page first
-        document.body.style.display = "flex";
-
+        // Demo mode → skip login
         if(cfg.demo_mode){
-            window.location.replace("/index.html");
+            window.location.href = "/index.html";
             return;
         }
 
+        // If already logged in → skip login
         if(sessionStorage.getItem("token")){
-            window.location.replace("/index.html");
-            return;
+            window.location.href = "/index.html";
         }
 
     }catch(err){
-
-        console.error("Config check failed");
-
-        document.body.style.display = "flex";
-
+        console.warn("Config check failed");
     }
 
 }
@@ -133,6 +127,7 @@ async function login(){
 
     window.location.href="/index.html";
 }
+
 </script>
 
 </body>
