@@ -410,37 +410,28 @@
 
                 DEMO_MODE_UI = cfg.demo_mode;
 
+                // DEMO MODE
                 if (DEMO_MODE_UI) {
-
-                    // Demo mode
                     document.getElementById("logoutBtn")?.remove();
-
-                } else {
-
-                    // Real infra mode
-                    document.getElementById("demo-banner")?.remove();
-
-                    if (!sessionStorage.getItem("token")) {
-                        window.location.replace("login.html");
-                        return;
-                    }
-
+                    return;
                 }
-                
-                document.body.style.display = "flex";
+
+                // REAL MODE
+                const token = sessionStorage.getItem("token");
+
+                if (!token) {
+                    window.location.href = "/login.html";
+                    return;
+                }
+
+                document.getElementById("demo-banner")?.remove();
 
             } catch (err) {
 
                 console.error("Config load failed", err);
 
-                // fallback safety
-                if (!sessionStorage.getItem("token")) {
-                    window.location.replace("login.html");
-                }
-
-                document.body.style.display = "flex";
-
             }
+
         }
 
         function parseBackendTime(ts) {

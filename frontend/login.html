@@ -76,33 +76,6 @@ button:hover{
 
 const API = "https://multi-cloud-governance-platform.onrender.com";
 
-async function checkMode(){
-
-    try{
-
-        const res = await fetch(API + "/config");
-        const cfg = await res.json();
-
-        // Demo mode → skip login
-        if(cfg.demo_mode){
-            window.location.href = "/index.html";
-            return;
-        }
-
-        // If already logged in → skip login
-        if(sessionStorage.getItem("token")){
-            window.location.href = "/index.html";
-        }
-
-    }catch(err){
-        console.warn("Config check failed");
-    }
-
-}
-
-checkMode();
-
-
 async function login(){
 
     const username = document.getElementById("user").value;
