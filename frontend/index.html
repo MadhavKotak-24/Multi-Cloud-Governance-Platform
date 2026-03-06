@@ -405,7 +405,7 @@
 
             try {
 
-                const res = await fetch(API_BASE_URL + "/config");
+                const res = await fetch(API_BASE_URL + "/deployments/config");
                 const cfg = await res.json();
 
                 DEMO_MODE_UI = cfg.demo_mode;
@@ -535,6 +535,8 @@
             loadPolicies();
             fetchData();
 
+            checkHealth();
+            setInterval(checkHealth, 10000);
             setInterval(fetchData, 3000);
 
 
@@ -795,7 +797,7 @@
 
         async function checkHealth() {
             try {
-                const res = await authFetch(API_BASE_URL + "/health");
+                const res = await authFetch(API_BASE_URL + "/deployments/health");
                 if(!res.ok) throw new Error();
 
                 if (DEMO_MODE_UI) {
@@ -813,9 +815,6 @@
 
             }
         }
-
-        checkHealth();
-        setInterval(checkHealth, 10000);
 
         // Logout logic
 

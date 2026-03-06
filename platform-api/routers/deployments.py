@@ -31,6 +31,16 @@ STAGE_INTERVAL = 3  # seconds per stage
 
 router = APIRouter(prefix="/deployments")
 
+@router.get("/config")
+def get_config():
+    """Returns the demo mode status for the frontend."""
+    return {"demo_mode": DEMO_MODE}
+
+@router.get("/health")
+def health_check():
+    """Simple health check endpoint."""
+    return {"status": "ok"}
+
 # ---------------- LOGIN ---------------- #
 
 class LoginRequest(BaseModel):

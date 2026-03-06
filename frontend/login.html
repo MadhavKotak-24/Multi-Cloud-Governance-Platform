@@ -79,7 +79,7 @@ const API = "https://multi-cloud-governance-platform.onrender.com";
 // Check Demo Mode on load
 window.addEventListener('DOMContentLoaded', async () => {
     try {
-        const res = await fetch(API + "/config");
+        const res = await fetch(API + "/deployments/config");
         const data = await res.json();
         if (data.demo_mode) {
             window.location.href = "index.html";
@@ -111,7 +111,7 @@ async function login(){
 
     sessionStorage.setItem("token",data.token);
 
-    window.location.href="/index.html";
+    window.location.href="index.html";
 }
 
 </script>
