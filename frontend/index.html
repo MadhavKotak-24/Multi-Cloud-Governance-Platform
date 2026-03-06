@@ -483,22 +483,29 @@
         }
 
         // MOCK DATA (Fallback if backend offline)
-        const MOCK_DATA = [
-        {
-            id:"DEP-demo1",
-            cloud:"aws",
-            environment:"dev",
-            application:"payment-service",
-            status:"SUCCESS",
-            created_at:new Date().toISOString(),
-            events:[
-                {status:"REQUESTED",time:new Date().toISOString()},
-                {status:"VALIDATED",time:new Date().toISOString()},
-                {status:"IN_PROGRESS",time:new Date().toISOString()},
-                {status:"SUCCESS",time:new Date().toISOString()}
-            ]
+        let MOCK_DATA = JSON.parse(localStorage.getItem("demo_deployments") || "[]");
+
+        if (MOCK_DATA.length === 0) {
+
+            MOCK_DATA = [
+            {
+                id:"DEP-demo1",
+                cloud:"aws",
+                environment:"dev",
+                application:"payment-service",
+                status:"SUCCESS",
+                created_at:"2026-03-05T10:00:00Z",
+                events:[
+                    {status:"REQUESTED",time:new Date().toISOString()},
+                    {status:"VALIDATED",time:new Date().toISOString()},
+                    {status:"IN_PROGRESS",time:new Date().toISOString()},
+                    {status:"SUCCESS",time:new Date().toISOString()}
+                ]
+            }
+            ];
+
+            localStorage.setItem("demo_deployments", JSON.stringify(MOCK_DATA));
         }
-        ];
 
         // DOM CACHE
         const el = {
@@ -540,7 +547,15 @@
 
             checkHealth();
             setInterval(checkHealth, 10000);
-            setInterval(fetchData, 3000);
+            setInterval(()=>{
+
+                if(DEMO_MODE_UI){
+                    updateDemoLifecycle();
+                }
+
+                fetchData();
+
+            },3000);
 
 
             if(el.submitBtn) el.submitBtn.addEventListener('click', handleSubmit);
@@ -624,13 +639,19 @@
 
             try {
 
-                // Demo mode → use simulated deployments
+                // DEMO MODE
                 if (DEMO_MODE_UI) {
-                    renderData(MOCK_DATA);
+
+                    const deployments = JSON.parse(
+                        localStorage.getItem("demo_deployments") || "[]"
+                    );
+
+                    renderData(deployments);
+
                     return;
                 }
 
-                // Real infrastructure mode
+                // REAL INFRASTRUCTURE MODE
                 const res = await authFetch(`${API_BASE_URL}/deployments/`);
 
                 if(!res.ok) throw new Error("Backend error");
@@ -643,21 +664,64 @@
 
                 console.error("Backend unreachable", e);
 
-                // If backend fails but demo mode → still show mock deployments
                 if (DEMO_MODE_UI) {
-                    renderData(MOCK_DATA);
+
+                    const deployments = JSON.parse(
+                        localStorage.getItem("demo_deployments") || "[]"
+                    );
+
+                    renderData(deployments);
+
                 } else {
+
                     el.tables.dash.innerHTML = `
                         <tr>
-                            <td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem;">
+                            <td colspan="6"
+                                style="text-align:center;color:var(--text-muted);padding:2rem;">
                                 Backend offline – no deployment data available
                             </td>
                         </tr>`;
+
                 }
 
             }
 
         }
+
+        function updateDemoLifecycle(){
+
+            const deployments = JSON.parse(localStorage.getItem("demo_deployments") || "[]");
+
+            const stages = ["REQUESTED","VALIDATED","IN_PROGRESS","SUCCESS"];
+
+            deployments.forEach(dep=>{
+
+                if(dep.status === "SUCCESS") return;
+
+                const elapsed = (Date.now() - new Date(dep.created_at)) / 1000;
+
+                const stageIndex = Math.min(Math.floor(elapsed/3), stages.length-1);
+
+                const newStatus = stages[stageIndex];
+
+                if(newStatus !== dep.status){
+
+                    dep.status = newStatus;
+
+                    dep.events.push({
+                        status:newStatus,
+                        time:new Date().toISOString()
+                    });
+                }
+
+            });
+
+            localStorage.setItem("demo_deployments",JSON.stringify(deployments));
+
+            MOCK_DATA = deployments;
+
+        }
+
         function renderData(data) {
             const rowsHtml = data.map(dep => {
                 const provClass = dep.cloud.toLowerCase().includes('aws') ? 'aws-icon' : 'azure-icon';
@@ -769,7 +833,13 @@
                         ]
                     };
 
-                    MOCK_DATA.unshift(newDeployment);
+                    const deployments = JSON.parse(localStorage.getItem("demo_deployments") || "[]");
+
+                    deployments.unshift(newDeployment);
+
+                    localStorage.setItem("demo_deployments", JSON.stringify(deployments));
+
+                    MOCK_DATA = deployments;
 
                     renderData(MOCK_DATA);
 
