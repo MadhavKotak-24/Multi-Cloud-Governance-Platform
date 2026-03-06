@@ -429,6 +429,9 @@
             } catch (err) {
 
                 console.error("Config load failed", err);
+                // Fallback: If backend is offline, force Demo Mode so UI still works
+                console.warn("Backend unreachable. Defaulting to DEMO MODE.");
+                DEMO_MODE_UI = true;
 
             }
 
@@ -560,6 +563,38 @@
 
         // 2. POLICIES LOGIC
         //Deleted
+        async function loadPolicies() {
+            try {
+                const res = await authFetch(`${API_BASE_URL}/policies`);
+                if (!res.ok) throw new Error("Failed to load policies");
+                const policies = await res.json();
+                renderPolicies(policies);
+            } catch (err) {
+                el.policiesContainer.innerHTML = `
+                    <div style="color: var(--text-muted); padding:1rem;">
+                        Unable to load policies from backend
+                    </div>`;
+            }
+        }
+
+        function renderPolicies(policies) {
+            el.policiesContainer.innerHTML = policies.map(p => `
+                <div class="card">
+                    <div class="card-header" style="display:flex; justify-content:space-between;">
+                        <div class="card-title">${p.name}</div>
+                        <span class="status-badge ${
+                            p.status === 'ACTIVE' ? 'status-success' : 'status-audit'
+                        }">${p.status}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="policy-meta">
+                            ID: ${p.id} | Severity: ${p.severity}
+                        </div>
+                        <p>${p.desc}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
 
         // 3. DEPLOYMENT & TIMELINE LOGIC
 
