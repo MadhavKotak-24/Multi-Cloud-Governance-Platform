@@ -11,8 +11,8 @@ if not JWT_SECRET:
     raise RuntimeError("SECRET_KEY not set in environment")
 
 DEMO_USER = {
-    "username": "admin",
-    "password": "admin123"
+    "username": os.getenv("DEMO_USER"),
+    "password": os.getenv("DEMO_PASSWORD")
 }
 
 def create_token(username: str):

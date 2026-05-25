@@ -2,6 +2,13 @@
 
 A policy-driven internal developer platform (IDP) that acts as a centralized control plane for multi-cloud deployments.
 
+Demo Credentials
+
+Username: admin
+Password: admin123
+
+These credentials are intentionally public and provide access only to demo functionality.
+
 🚩 Overview
 
 The Multi-Cloud Governance Platform is an internal developer platform (IDP) built to reduce operational and governance complexity when deploying applications across multiple cloud providers.
