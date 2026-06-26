@@ -2,6 +2,10 @@ from datetime import datetime, timedelta
 from jose import jwt, JWTError
 from fastapi import HTTPException, Depends, Header
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 JWT_SECRET = os.getenv("JWT_SECRET") 
 print("SECRET LOADED:", JWT_SECRET)
  # move to env later

@@ -1,8 +1,10 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI
 from routers.deployments import router as deployment_router
 from fastapi.middleware.cors import CORSMiddleware
 from routers.policies import router as policy_router
-from dotenv import load_dotenv
 import os
 import logging
 
@@ -12,8 +14,6 @@ logging.basicConfig(
 )
 
 
-# Load environment variables from .env file
-load_dotenv()
 
 app = FastAPI(title="Multi-Cloud Governance Platform")
 DEMO_MODE = os.getenv("DEMO_MODE", "true").lower() == "true"
