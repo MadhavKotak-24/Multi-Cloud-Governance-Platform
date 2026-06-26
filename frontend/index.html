@@ -396,10 +396,15 @@
 
     <script>
 
-        // CONFIG
-        const API_BASE_URL = window.location.protocol === 'file:' 
-            ? 'https://multi-cloud-governance-platform.onrender.com' 
-            : window.location.origin + '/api';
+        const IS_LOCAL = window.location.hostname === 'localhost' || 
+                         window.location.hostname === '127.0.0.1' || 
+                         window.location.hostname.startsWith('192.168.') || 
+                         window.location.hostname.startsWith('10.') || 
+                         window.location.hostname.startsWith('172.');
+
+        const API_BASE_URL = IS_LOCAL && window.location.protocol !== 'file:'
+            ? window.location.origin + '/api'
+            : 'https://multi-cloud-governance-platform.onrender.com';
 
         let DEMO_MODE_UI = false;
 
