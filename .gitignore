@@ -60,3 +60,4 @@ terraform.tfstate.*
 # =========================
 interview_prep_guide.md
 simplified_project_guide.md
+devops_interview_guide.md
