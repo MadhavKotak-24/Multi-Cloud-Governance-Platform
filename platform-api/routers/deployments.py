@@ -8,7 +8,7 @@ from services.auth import create_token, DEMO_USER, get_current_user
 from pydantic import BaseModel
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 
 PIPELINE_TOKEN = os.getenv("PIPELINE_TOKEN")
 
@@ -134,13 +134,13 @@ def list_deployments(user=Depends(get_current_user)):
             status = DEMO_STAGES[stage_index]
 
             events = []
-        for i in range(stage_index + 1):
-            stage_time = dep["created_at"] + timedelta(seconds=i * STAGE_INTERVAL)
+            for i in range(stage_index + 1):
+                stage_time = dep["created_at"] + timedelta(seconds=i * STAGE_INTERVAL)
 
-            events.append({
-                "status": DEMO_STAGES[i],
-                "time": stage_time.isoformat()
-            })
+                events.append({
+                    "status": DEMO_STAGES[i],
+                    "time": stage_time.isoformat()
+                })
 
             results.append({
                 "id": dep["id"],

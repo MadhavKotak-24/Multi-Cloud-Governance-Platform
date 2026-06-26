@@ -397,7 +397,9 @@
     <script>
 
         // CONFIG
-        const API_BASE_URL = 'https://multi-cloud-governance-platform.onrender.com';
+        const API_BASE_URL = window.location.protocol === 'file:' 
+            ? 'https://multi-cloud-governance-platform.onrender.com' 
+            : window.location.origin + '/api';
 
         let DEMO_MODE_UI = false;
 
@@ -451,7 +453,7 @@
         // STATIC POLICIES CONFIG
         async function loadPolicies() {
             try {
-                const res = await authFetch(`${API_BASE_URL}/policies`);
+                const res = await authFetch(`${API_BASE_URL}/policies/`);
                 if (!res.ok) throw new Error("Failed to load policies");
                 const policies = await res.json();
                 renderPolicies(policies);
@@ -580,7 +582,7 @@
         //Deleted
         async function loadPolicies() {
             try {
-                const res = await authFetch(`${API_BASE_URL}/policies`);
+                const res = await authFetch(`${API_BASE_URL}/policies/`);
                 if (!res.ok) throw new Error("Failed to load policies");
                 const policies = await res.json();
                 renderPolicies(policies);

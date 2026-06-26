@@ -2,18 +2,29 @@ version: "3.9"
 
 services:
 
+  frontend:
+    build: ./frontend
+    container_name: cloudgov-frontend
+    ports:
+      - "8082:80"
+    depends_on:
+      - api
+
   api:
     build: ./platform-api
     container_name: cloudgov-api
+    restart: on-failure
     ports:
       - "8000:8000"
     env_file:
       - .env
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
     depends_on:
       - db
 
   db:
-    image: postgres:15
+    build: ./db
     container_name: cloudgov-db
     restart: always
     environment:
@@ -21,7 +32,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 

@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from services.config import EMAIL_ALERTS, SLACK_ALERTS
 
 router = APIRouter(prefix="/policies", tags=["Policies"])
 

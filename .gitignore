@@ -54,3 +54,9 @@ Thumbs.db
 terraform.tfstate
 terraform.tfstate.*
 .terraform.lock.hcl
+
+# =========================
+# INTERVIEW FILES
+# =========================
+interview_prep_guide.md
+simplified_project_guide.md

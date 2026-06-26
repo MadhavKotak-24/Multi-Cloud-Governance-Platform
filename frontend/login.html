@@ -74,7 +74,9 @@ button:hover{
 
 <script>
 
-const API = "https://multi-cloud-governance-platform.onrender.com";
+const API = window.location.protocol === 'file:'
+    ? "https://multi-cloud-governance-platform.onrender.com"
+    : window.location.origin + "/api";
 
 // Check Demo Mode on load
 window.addEventListener('DOMContentLoaded', async () => {
